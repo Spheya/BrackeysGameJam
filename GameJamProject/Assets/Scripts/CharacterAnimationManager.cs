@@ -24,7 +24,7 @@ public class CharacterAnimationManager : MonoBehaviour
         Vector3 newPos = transform.position;
 
         Vector3 delta = newPos - _position;
-        bool idle = delta.magnitude < Time.deltaTime;
+        bool idle = delta.magnitude < Time.deltaTime * 0.5f;
 
         if (!idle)
         {
