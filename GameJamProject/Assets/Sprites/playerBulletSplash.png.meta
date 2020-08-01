@@ -1,25 +1,13 @@
 fileFormatVersion: 2
-<<<<<<< HEAD
-guid: a6b267d9f188ec84eb1e91e7efec3e56
-TextureImporter:
-  internalIDToNameTable: []
-=======
-guid: 431275ff5589b7a4db6fd9d1f56fee03
+guid: c9a46e53946bbfd4cbdca255c80909be
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: -4373184736405950995
-    second: floor_0
+      213: 3790811193931334013
+    second: playerBulletSplash_0
   - first:
-      213: 4158732434352698325
-    second: floor_1
-  - first:
-      213: 4341242654334979365
-    second: floor_2
-  - first:
-      213: 1903813881350671106
-    second: floor_3
->>>>>>> d380f7a2968154ffe0b989b455a1eefb0a567819
+      213: 1908834650883089535
+    second: playerBulletSplash_1
   externalObjects: {}
   serializedVersion: 11
   mipmaps:
@@ -49,11 +37,7 @@ TextureImporter:
   maxTextureSize: 2048
   textureSettings:
     serializedVersion: 2
-<<<<<<< HEAD
     filterMode: -1
-=======
-    filterMode: 0
->>>>>>> d380f7a2968154ffe0b989b455a1eefb0a567819
     aniso: -1
     mipBias: -100
     wrapU: 1
@@ -62,20 +46,12 @@ TextureImporter:
   nPOTScale: 0
   lightmap: 0
   compressionQuality: 50
-<<<<<<< HEAD
-  spriteMode: 1
-=======
   spriteMode: 2
->>>>>>> d380f7a2968154ffe0b989b455a1eefb0a567819
   spriteExtrude: 1
   spriteMeshType: 1
   alignment: 0
   spritePivot: {x: 0.5, y: 0.5}
-<<<<<<< HEAD
-  spritePixelsToUnits: 100
-=======
   spritePixelsToUnits: 32
->>>>>>> d380f7a2968154ffe0b989b455a1eefb0a567819
   spriteBorder: {x: 0, y: 0, z: 0, w: 0}
   spriteGenerateFallbackPhysicsShape: 1
   alphaUsage: 1
@@ -94,10 +70,7 @@ TextureImporter:
     maxTextureSize: 2048
     resizeAlgorithm: 0
     textureFormat: -1
-<<<<<<< HEAD
     textureCompression: 1
-=======
-    textureCompression: 0
     compressionQuality: 50
     crunchedCompression: 0
     allowsAlphaSplitting: 0
@@ -109,8 +82,7 @@ TextureImporter:
     maxTextureSize: 2048
     resizeAlgorithm: 0
     textureFormat: -1
-    textureCompression: 0
->>>>>>> d380f7a2968154ffe0b989b455a1eefb0a567819
+    textureCompression: 1
     compressionQuality: 50
     crunchedCompression: 0
     allowsAlphaSplitting: 0
@@ -119,75 +91,9 @@ TextureImporter:
     forceMaximumCompressionQuality_BC6H_BC7: 0
   spriteSheet:
     serializedVersion: 2
-<<<<<<< HEAD
-    sprites: []
-=======
     sprites:
     - serializedVersion: 2
-      name: floor_0
-      rect:
-        serializedVersion: 2
-        x: 0
-        y: 96
-        width: 32
-        height: 32
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      outline: []
-      physicsShape: []
-      tessellationDetail: 0
-      bones: []
-      spriteID: dedec5107a35f43c0800000000000000
-      internalID: -4373184736405950995
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: floor_1
-      rect:
-        serializedVersion: 2
-        x: 0
-        y: 64
-        width: 32
-        height: 32
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      outline: []
-      physicsShape: []
-      tessellationDetail: 0
-      bones: []
-      spriteID: 5d3fc797d19c6b930800000000000000
-      internalID: 4158732434352698325
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: floor_2
-      rect:
-        serializedVersion: 2
-        x: 0
-        y: 32
-        width: 32
-        height: 32
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      outline: []
-      physicsShape: []
-      tessellationDetail: 0
-      bones: []
-      spriteID: 52d096771313f3c30800000000000000
-      internalID: 4341242654334979365
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: floor_3
+      name: playerBulletSplash_0
       rect:
         serializedVersion: 2
         x: 0
@@ -201,13 +107,33 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: 20b4d5463a4bb6a10800000000000000
-      internalID: 1903813881350671106
+      spriteID: d710ad042baab9430800000000000000
+      internalID: 3790811193931334013
       vertices: []
       indices: 
       edges: []
       weights: []
->>>>>>> d380f7a2968154ffe0b989b455a1eefb0a567819
+    - serializedVersion: 2
+      name: playerBulletSplash_1
+      rect:
+        serializedVersion: 2
+        x: 32
+        y: 0
+        width: 32
+        height: 32
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: f74e7d4600b8d7a10800000000000000
+      internalID: 1908834650883089535
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
     outline: []
     physicsShape: []
     bones: []
