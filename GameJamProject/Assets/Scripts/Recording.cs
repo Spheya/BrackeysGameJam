@@ -7,7 +7,7 @@ public class Recording : MonoBehaviour
     bool recording = true;
 
     const float maxTime = 10.0f; // seconds between the start and end of the recording
-    const float precision = 0.1f; // time between recorded positions
+    const float precision = 1.0f / 30.0f; // time between recorded positions
     float positionTimer = 0.0f;
     float totalTimer = 0.0f;
     Queue<Vector2> recordingPositions = new Queue<Vector2>();
