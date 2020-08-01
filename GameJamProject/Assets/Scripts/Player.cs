@@ -26,5 +26,11 @@ public class Player : MonoBehaviour
             inputVector.Normalize();
         }
         character.Move(inputVector);
+
+        if (Input.GetKeyDown(KeyCode.Space))
+        {
+            // Unsafe but this is only for testing!
+            GetComponent<Recording>().Play();
+        }
     }
 }
