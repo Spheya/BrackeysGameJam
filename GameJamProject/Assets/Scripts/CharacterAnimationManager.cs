@@ -14,6 +14,8 @@ public class CharacterAnimationManager : MonoBehaviour
     void Start()
     {
         _animator = GetComponent<Animator>();
+
+        _animator.SetFloat("dirY", -1.0f);
     }
 
     // Update is called once per frame
@@ -22,8 +24,7 @@ public class CharacterAnimationManager : MonoBehaviour
         Vector3 newPos = transform.position;
 
         Vector3 delta = newPos - _position;
-        delta *= 100.0f;
-        bool idle = delta.magnitude < 0.001f;
+        bool idle = delta.magnitude < Time.deltaTime;
 
         if (!idle)
         {
