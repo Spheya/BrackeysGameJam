@@ -10,11 +10,14 @@ public class Enemy : MonoBehaviour
 
     CharacterMovement character;
 
+
     [Range(0.0f, 100.0f)]
     public float health = 100.0f;
     private float speed = 1.0f;
     [Range(0.0f, 10.0f)]
     public float maxSpeed = 5.0f;
+
+    public GameObject explosion;
 
     // Start is called before the first frame update
     void Start()
@@ -41,6 +44,9 @@ public class Enemy : MonoBehaviour
 
             character.Move(inputVector);
         }
+
+        if (health <= 0.0f)
+            Die();
     }
 
     private void FindPlayer()
@@ -61,6 +67,8 @@ public class Enemy : MonoBehaviour
 
     public void Die()
     {
-        
+        var effect = Instantiate(explosion);
+        effect.transform.position = new Vector3(transform.position.x, transform.position.y, 5.0f);
+        Destroy(gameObject);
     }
 }
