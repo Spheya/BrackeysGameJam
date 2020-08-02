@@ -22,5 +22,6 @@ public class CharacterMovement : MonoBehaviour
     {
         Vector2 movementVector = new Vector2(inputVector.x, inputVector.y) * moveSpeed;
         _rigidBody.velocity = movementVector;
+        transform.position = new Vector3(transform.position.x, transform.position.y, transform.position.y/10.0f);
     }
 }

@@ -40,7 +40,7 @@ public class Gun : MonoBehaviour
 
         // Set the length of that direction to the distance
         Vector3 offset = aimDir.normalized * Distance;
-        offset.z = offset.y;
+        offset.z = offset.y / 100.0f;
         transform.position = _parent.transform.position + offset;
 
         // Rotate towards that direction and flip if the gun appears upside down
