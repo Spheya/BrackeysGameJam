@@ -6,6 +6,9 @@ public class Recording : MonoBehaviour
 {
     bool recording = true;
 
+    [SerializeField]
+    bool destroyOnFinish = true;
+
     const float maxTime = 10.0f; // seconds between the start and end of the recording
     const float precision = 1.0f / 30.0f; // time between recorded positions
     float positionTimer = 0.0f;
@@ -57,7 +60,20 @@ public class Recording : MonoBehaviour
                 }
                 else
                 {
-                    Destroy(gameObject);
+                    if (destroyOnFinish)
+                    {
+                        Destroy(gameObject);
+                    }
+                    else
+                    {
+                        recording = true;
+
+                        Enemy enemy = GetComponent<Enemy>();
+                        if (enemy != null)
+                        {
+                            enemy.enabled = true;
+                        }
+                    }
                 }
             }
 
@@ -79,6 +95,11 @@ public class Recording : MonoBehaviour
         if (player != null)
         {
             player.enabled = false;
+        }
+        Enemy enemy = GetComponent<Enemy>();
+        if (enemy != null)
+        {
+            enemy.enabled = false;
         }
 
         currentPosition = recordingPositions.Dequeue();

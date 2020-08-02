@@ -44,9 +44,14 @@ public class Player : MonoBehaviour
         {
             Recording recording = GetComponent<Recording>();
             Vector2 origin = recording.GetStartPosition();
-
+            
+            Recording[] recordings = FindObjectsOfType<Recording>();
+            
             Instantiate(gameObject, new Vector3(origin.x, origin.y, 0.0f), Quaternion.identity);
-            recording.Play();
+            for (int i = 0; i < recordings.Length; i++)
+            {
+                recordings[i].Play();
+            }
 
             activeRecording = true;
         }
