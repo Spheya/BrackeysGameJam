@@ -78,10 +78,22 @@ public class Recording : MonoBehaviour
         Player player = GetComponent<Player>();
         if (player != null)
         {
-            Destroy(player);
+            player.enabled = false;
         }
 
         currentPosition = recordingPositions.Dequeue();
         nextPosition = recordingPositions.Dequeue();
+    }
+
+    public Vector2 GetStartPosition()
+    {
+        if (recordingPositions.Count > 0)
+        {
+            return recordingPositions.Peek();
+        }
+        else
+        {
+            return Vector2.zero;
+        }
     }
 }
