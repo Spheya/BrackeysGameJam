@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -14,11 +15,13 @@ public class Recording : MonoBehaviour
     float positionTimer = 0.0f;
     float totalTimer = 0.0f;
     Queue<Vector2> recordingPositions = new Queue<Vector2>();
+    Queue<Vector3> recordingGunPositions = new Queue<Vector3>();
     Queue<Vector3> recordingBullets = new Queue<Vector3>(); // (x, y) for position, I'm using z as time (so I don't need another queue lol)
 
     Vector2 currentPosition;
     Vector2 nextPosition;
-    Vector3 currentGun;
+    Vector3 currentGunPosition;
+    Vector3 nextGunPosition;
 
     Gun gun;
 
@@ -27,6 +30,9 @@ public class Recording : MonoBehaviour
     {
         recordingPositions.Enqueue(new Vector2(transform.position.x, transform.position.y));
         gun = transform.GetComponentInChildren<Gun>();
+
+        if(gun)
+            recordingGunPositions.Enqueue(new Vector2(gun.transform.position.x, gun.transform.position.y));
     }
 
     // Update is called once per frame
@@ -40,12 +46,19 @@ public class Recording : MonoBehaviour
             if (positionTimer > precision)
             {
                 positionTimer -= precision;
+
                 recordingPositions.Enqueue(new Vector2(transform.position.x, transform.position.y));
+                
+                if(gun)
+                    recordingGunPositions.Enqueue(new Vector2(gun.transform.position.x, gun.transform.position.y));
 
                 // Don't let the queue get longer than it needs to be! We don't need to record the entire game, only the last few seconds
                 if ((float)recordingPositions.Count * precision > maxTime)
                 {
                     recordingPositions.Dequeue();
+
+                    if (gun)
+                        recordingGunPositions.Dequeue();
                 }
             }
 
@@ -70,6 +83,12 @@ public class Recording : MonoBehaviour
                 {
                     currentPosition = nextPosition;
                     nextPosition = recordingPositions.Dequeue();
+
+                    if (gun)
+                    {
+                        currentGunPosition = nextGunPosition;
+                        nextGunPosition = recordingGunPositions.Dequeue();
+                    }
                 }
                 else
                 {
@@ -97,23 +116,21 @@ public class Recording : MonoBehaviour
             {
                 if (recordingBullets.Count > 0)
                 {
-                    time = Mathf.InverseLerp(currentGun.z, recordingBullets.Peek().z, totalTimer);
                     Vector3 nextGun = recordingBullets.Peek();
-
-                    Vector3 offset = Vector3.Lerp(currentGun, nextGun, time);
-                    offset.z = offset.y / 100.0f;
-                    gun.transform.position = gun.Parent.transform.position + offset;
-
-                    // Rotate towards that direction and flip if the gun appears upside down
-                    float rotation = (Mathf.Atan2(offset.y, offset.x) * 180.0f / Mathf.PI + 180.0f) % 360.0f;
-                    gun.transform.eulerAngles = new Vector3(0.0f, 0.0f, rotation);
-                    gun.transform.localScale = new Vector3(1.0f, (rotation < 270.0f && rotation > 90.0f) ? -1.0f : 1.0f, 1.0f);
 
                     if (totalTimer > nextGun.z)
                     {
+                        Vector3 offset = nextGun;
+                        offset.z = offset.y / 100.0f;
+                        gun.transform.position = gun.Parent.transform.position + offset;
+
+                        // Rotate towards that direction and flip if the gun appears upside down
+                        float rotation = (Mathf.Atan2(offset.y, offset.x) * 180.0f / Mathf.PI + 180.0f) % 360.0f;
+                        gun.transform.eulerAngles = new Vector3(0.0f, 0.0f, rotation);
+                        gun.transform.localScale = new Vector3(1.0f, (rotation < 270.0f && rotation > 90.0f) ? -1.0f : 1.0f, 1.0f);
                         gun.Shoot();
-                        currentGun = recordingBullets.Dequeue();
-                        Debug.Log(currentGun);
+
+                        recordingBullets.Dequeue();
                     }
                 }
             }
@@ -121,6 +138,16 @@ public class Recording : MonoBehaviour
             time = positionTimer / precision; // time normalised between 0 and 1, for interpolation
             lerpPosition = Vector2.Lerp(currentPosition, nextPosition, time);
             transform.position = new Vector3(lerpPosition.x, lerpPosition.y, 0.0f);
+
+            if(gun)
+            {
+                var lerpGunPosition = Vector3.Lerp(currentGunPosition, nextGunPosition, time);
+                gun.transform.position = new Vector3(lerpGunPosition.x, lerpGunPosition.y, 0.0f);
+                Vector2 offset = gun.transform.position - transform.position;
+                float rotation = (Mathf.Atan2(offset.y, offset.x) * 180.0f / Mathf.PI + 180.0f) % 360.0f;
+                gun.transform.eulerAngles = new Vector3(0.0f, 0.0f, rotation);
+                gun.transform.localScale = new Vector3(1.0f, (rotation < 270.0f && rotation > 90.0f) ? -1.0f : 1.0f, 1.0f);
+            }
         }
     }
 
@@ -128,9 +155,12 @@ public class Recording : MonoBehaviour
     {
         recordingPositions.Enqueue(new Vector2(transform.position.x, transform.position.y));
 
+        if(gun)
+            recordingGunPositions.Enqueue(new Vector2(gun.transform.position.x, gun.transform.position.y));
+
         recording = false;
         positionTimer = 0.0f;
-        totalTimer -= maxTime;
+        totalTimer = Mathf.Max(0.0f, totalTimer - maxTime);
 
         Player player = GetComponent<Player>();
         if (player != null)
@@ -150,7 +180,10 @@ public class Recording : MonoBehaviour
         currentPosition = recordingPositions.Dequeue();
         nextPosition = recordingPositions.Dequeue();
 
-        currentGun = new Vector3(1.0f, 0.0f, 0.0f);
+        currentGunPosition = recordingGunPositions.Dequeue();
+        nextGunPosition = recordingGunPositions.Dequeue();
+
+        Console.WriteLine(recordingPositions.Count + " : " + recordingGunPositions.Count);
     }
 
     public Vector2 GetStartPosition()
