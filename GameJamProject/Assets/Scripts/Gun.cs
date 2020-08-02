@@ -77,7 +77,7 @@ public class Gun : MonoBehaviour
         _canShoot = true;
     }
 
-    private void Shoot()
+    public void Shoot()
     {
         var bullet = Instantiate(Bullet);
         bullet.transform.position = transform.position + Vector3.forward * (_distance + 0.1f);
