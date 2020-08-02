@@ -4,16 +4,17 @@ using System.Collections.Generic;
 using UnityEngine;
 
 [RequireComponent(typeof(Animator))]
+[RequireComponent(typeof(Rigidbody2D))]
 public class CharacterAnimationManager : MonoBehaviour
 {
     private Animator _animator;
-
-    private Vector3 _position;
+    private Rigidbody2D _rigidBody;
 
     // Start is called before the first frame update
     void Start()
     {
         _animator = GetComponent<Animator>();
+        _rigidBody = GetComponent<Rigidbody2D>();
 
         _animator.SetFloat("dirY", -1.0f);
     }
@@ -21,10 +22,8 @@ public class CharacterAnimationManager : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        Vector3 newPos = transform.position;
-
-        Vector3 delta = newPos - _position;
-        bool idle = delta.magnitude < Time.deltaTime * 0.5f;
+        Vector3 delta = _rigidBody.velocity;
+        bool idle = delta.magnitude < 0.01f;
 
         if (!idle)
         {
@@ -32,7 +31,5 @@ public class CharacterAnimationManager : MonoBehaviour
             _animator.SetFloat("dirY", delta.y);
         }
         _animator.SetBool("idle", idle);
-
-        _position = newPos;
     }
 }
