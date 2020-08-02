@@ -3,9 +3,11 @@ using System.Collections.Generic;
 using UnityEngine;
 
 [RequireComponent(typeof(CharacterMovement))]
+[RequireComponent(typeof(Recording))]
 public class Player : MonoBehaviour
 {
     CharacterMovement character;
+    static bool activeRecording = false;
 
     // Start is called before the first frame update
     void Start()
@@ -29,8 +31,30 @@ public class Player : MonoBehaviour
 
         if (Input.GetKeyDown(KeyCode.Space))
         {
-            // Unsafe but this is only for testing!
-            GetComponent<Recording>().Play();
+            Die();
         }
+    }
+
+    public void Die()
+    {
+        if (!activeRecording)
+        {
+            Recording recording = GetComponent<Recording>();
+            Vector2 origin = recording.GetStartPosition();
+
+            Instantiate(gameObject, new Vector3(origin.x, origin.y, 0.0f), Quaternion.identity);
+            recording.Play();
+
+            activeRecording = true;
+        }
+        else
+        {
+            Destroy(gameObject);
+        }
+    }
+
+    private void OnDestroy()
+    {
+        activeRecording = false;
     }
 }
