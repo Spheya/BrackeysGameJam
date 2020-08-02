@@ -23,12 +23,19 @@ public class Gun : MonoBehaviour
     private float _shootCooldown;
     public float ShootCooldown { get => _shootCooldown; set => _shootCooldown = value; }
 
+    [SerializeField]
+    private bool _doUpdate = true;
+    public bool DoUpdate { get => _doUpdate; set => _doUpdate = value; }
+
     private bool _canShoot = true;
 
     private void Update()
     {
-        UpdatePosition();
-        UpdateShooting();
+        if (_doUpdate)
+        {
+            UpdatePosition();
+            UpdateShooting();
+        }
     }
 
     private void UpdatePosition()
@@ -80,5 +87,11 @@ public class Gun : MonoBehaviour
         bullet.transform.position = transform.position + Vector3.forward * (_distance + 0.1f);
         bullet.transform.rotation = transform.rotation;
         bullet.transform.localScale = transform.localScale;
+
+        if (_recording && _doUpdate)
+        {
+            Vector3 offset = transform.position - _parent.transform.position;
+            _recording.RecordBullet(new Vector2(offset.x, offset.y));
+        }
     }
 }
