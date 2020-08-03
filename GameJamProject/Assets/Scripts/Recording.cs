@@ -9,6 +9,10 @@ public class Recording : MonoBehaviour
 
     [SerializeField]
     bool destroyOnFinish = true;
+    [SerializeField]
+    bool canRollbackDeath = false;
+    bool alive = true;
+    float deathTimer = 0.0f;
 
     const float maxTime = 10.0f; // seconds between the start and end of the recording
     const float precision = 1.0f / 30.0f; // time between recorded positions
@@ -43,22 +47,34 @@ public class Recording : MonoBehaviour
 
         if (recording)
         {
-            if (positionTimer > precision)
+            if (alive)
             {
-                positionTimer -= precision;
-
-                recordingPositions.Enqueue(new Vector2(transform.position.x, transform.position.y));
-                
-                if(gun)
-                    recordingGunPositions.Enqueue(new Vector2(gun.transform.position.x, gun.transform.position.y));
-
-                // Don't let the queue get longer than it needs to be! We don't need to record the entire game, only the last few seconds
-                if ((float)recordingPositions.Count * precision > maxTime)
+                if (positionTimer > precision)
                 {
-                    recordingPositions.Dequeue();
+                    positionTimer -= precision;
+
+                    recordingPositions.Enqueue(new Vector2(transform.position.x, transform.position.y));
 
                     if (gun)
-                        recordingGunPositions.Dequeue();
+                        recordingGunPositions.Enqueue(new Vector2(gun.transform.position.x, gun.transform.position.y));
+
+                    // Don't let the queue get longer than it needs to be! We don't need to record the entire game, only the last few seconds
+                    if ((float)recordingPositions.Count * precision > maxTime)
+                    {
+                        recordingPositions.Dequeue();
+
+                        if (gun)
+                            recordingGunPositions.Dequeue();
+                    }
+                }
+            }
+            else
+            {
+                deathTimer += Time.deltaTime;
+                if (deathTimer > 10.0f)
+                {
+                    // Dead, this can't be reversed
+                    Destroy(gameObject);
                 }
             }
 
@@ -177,6 +193,30 @@ public class Recording : MonoBehaviour
             gun.DoUpdate = false;
         }
 
+        if (!alive && canRollbackDeath)
+        {
+            alive = true;
+            // Rolling back death
+
+            float sync = deathTimer % precision;
+            positionTimer += sync;
+            totalTimer += sync;
+
+            if (enemy)
+                enemy.health = 100.0f;
+
+            SpriteRenderer renderer = GetComponent<SpriteRenderer>();
+            if (renderer)
+            {
+                renderer.enabled = true;
+            }
+            BoxCollider2D collider = GetComponent<BoxCollider2D>();
+            if (collider)
+            {
+                collider.enabled = true;
+            }
+        }
+
         currentPosition = recordingPositions.Dequeue();
         nextPosition = recordingPositions.Dequeue();
 
@@ -202,5 +242,28 @@ public class Recording : MonoBehaviour
     public void RecordBullet(Vector2 direction)
     {
         recordingBullets.Enqueue(new Vector3(direction.x, direction.y, totalTimer));
+    }
+
+    public void Die()
+    {
+        alive = false;
+        if (canRollbackDeath)
+        {
+            // Dying, but this may get rolled back
+            SpriteRenderer renderer = GetComponent<SpriteRenderer>();
+            if (renderer)
+            {
+                renderer.enabled = false;
+            }
+            BoxCollider2D collider = GetComponent<BoxCollider2D>();
+            if (collider)
+            {
+                collider.enabled = false;
+            }
+        }
+        else
+        {
+            Destroy(gameObject);
+        }
     }
 }

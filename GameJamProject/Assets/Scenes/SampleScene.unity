@@ -250,6 +250,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   destroyOnFinish: 1
+  canRollbackDeath: 0
 --- !u!95 &168378458
 Animator:
   serializedVersion: 3

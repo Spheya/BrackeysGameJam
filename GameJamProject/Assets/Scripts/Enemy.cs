@@ -53,7 +53,6 @@ public class Enemy : MonoBehaviour
     {
         GameObject[] targetCharacters = GameObject.FindGameObjectsWithTag("Player");
         float minDistance = float.MaxValue;
-        Debug.Log("Found " + targetCharacters.Length + " player character(s)");
         for (int i = 0; i < targetCharacters.Length; i++)
         {
             float magnitude = (transform.position - targetCharacters[i].transform.position).magnitude;
@@ -69,6 +68,7 @@ public class Enemy : MonoBehaviour
     {
         var effect = Instantiate(explosion);
         effect.transform.position = new Vector3(transform.position.x, transform.position.y, 5.0f);
-        Destroy(gameObject);
+        GetComponent<Recording>().Die();
+        enabled = false;
     }
 }
