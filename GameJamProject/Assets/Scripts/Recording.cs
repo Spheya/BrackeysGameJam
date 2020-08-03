@@ -180,10 +180,11 @@ public class Recording : MonoBehaviour
         currentPosition = recordingPositions.Dequeue();
         nextPosition = recordingPositions.Dequeue();
 
-        currentGunPosition = recordingGunPositions.Dequeue();
-        nextGunPosition = recordingGunPositions.Dequeue();
-
-        Console.WriteLine(recordingPositions.Count + " : " + recordingGunPositions.Count);
+        if (gun)
+        {
+            currentGunPosition = recordingGunPositions.Dequeue();
+            nextGunPosition = recordingGunPositions.Dequeue();
+        }
     }
 
     public Vector2 GetStartPosition()

@@ -40,30 +40,45 @@ public class Player : MonoBehaviour
 
     public void Die()
     {
-        if (!activeRecording)
+        if (!rewinding)
         {
-            Recording recording = GetComponent<Recording>();
-            Vector2 origin = recording.GetStartPosition();
-            
-            Recording[] recordings = FindObjectsOfType<Recording>();
-            
-            Instantiate(gameObject, new Vector3(origin.x, origin.y, 0.0f), Quaternion.identity);
-            for (int i = 0; i < recordings.Length; i++)
+            if (!activeRecording)
             {
-                recordings[i].Play();
+                rewinding = true;
+                FindObjectOfType<RewindPostProcessing>().Play();
+                StartCoroutine(RewindAfterCooldown());
             }
-
-            activeRecording = true;
-
-            GetComponent<SpriteRenderer>().color = new Color(1.0f, 1.0f, 1.0f, 0.25f);
-            GetComponentsInChildren<SpriteRenderer>()[1].color = new Color(1.0f, 1.0f, 1.0f, 0.25f);
-
-             Destroy(FindObjectOfType<RewindTimer>()?.gameObject);
+            else
+            {
+                Destroy(gameObject);
+            }
         }
-        else
+    }
+
+    private bool rewinding = false;
+    private IEnumerator RewindAfterCooldown()
+    {
+        yield return new WaitForSeconds(0.2f);
+
+        Recording recording = GetComponent<Recording>();
+        Vector2 origin = recording.GetStartPosition();
+
+        Recording[] recordings = FindObjectsOfType<Recording>();
+
+        Instantiate(gameObject, new Vector3(origin.x, origin.y, 0.0f), Quaternion.identity);
+        for (int i = 0; i < recordings.Length; i++)
         {
-            Destroy(gameObject);
+            recordings[i].Play();
         }
+
+        activeRecording = true;
+
+        GetComponent<SpriteRenderer>().color = new Color(1.0f, 1.0f, 1.0f, 0.25f);
+        GetComponentsInChildren<SpriteRenderer>()[1].color = new Color(1.0f, 1.0f, 1.0f, 0.25f);
+
+        Destroy(FindObjectOfType<RewindTimer>()?.gameObject);
+
+        rewinding = false;
     }
 
     private void OnDestroy()
