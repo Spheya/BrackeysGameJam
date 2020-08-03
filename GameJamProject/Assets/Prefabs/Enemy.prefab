@@ -130,6 +130,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   destroyOnFinish: 0
+  precision: 0.033333335
 --- !u!50 &2235412483182041276
 Rigidbody2D:
   serializedVersion: 4

@@ -42,7 +42,7 @@ public class Player : MonoBehaviour
     {
         if (!rewinding)
         {
-            if (!activeRecording)
+            if (true)
             {
                 rewinding = true;
                 FindObjectOfType<RewindPostProcessing>().Play();
@@ -63,12 +63,17 @@ public class Player : MonoBehaviour
         Recording recording = GetComponent<Recording>();
         Vector2 origin = recording.GetStartPosition();
 
+        float newTime = Mathf.Max(recording.Timer - Recording.maxTime, 0.0f);
+        float rewindAmount = recording.Timer - newTime;
+
         Recording[] recordings = FindObjectsOfType<Recording>();
 
-        Instantiate(gameObject, new Vector3(origin.x, origin.y, 0.0f), Quaternion.identity);
+        var obj = Instantiate(gameObject, new Vector3(origin.x, origin.y, 0.0f), Quaternion.identity);
+        obj.name = "Player";
+        name = "Player(Clone)";
         for (int i = 0; i < recordings.Length; i++)
         {
-            recordings[i].Play();
+            recordings[i].Play(recordings[i].Timer - rewindAmount);
         }
 
         activeRecording = true;

@@ -1,4 +1,5 @@
 ﻿using System.Collections;
+using System.Linq;
 using UnityEngine;
 
 class RewindTimerSpawner : MonoBehaviour
@@ -37,9 +38,6 @@ class RewindTimerSpawner : MonoBehaviour
         yield return new WaitForSeconds(InitialCooldown);
         while (true)
         {
-            while (FindObjectsOfType<Player>().Length > 1)
-                yield return new WaitForSeconds(1.0f);
-
             Instantiate(Timer);
             yield return new WaitForSeconds(Interval);
         }

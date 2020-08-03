@@ -1363,7 +1363,7 @@ ParticleSystem:
       maxGradient:
         serializedVersion: 2
         key0: {r: 1, g: 1, b: 1, a: 1}
-        key1: {r: 0, g: 0, b: 0, a: 0}
+        key1: {r: 1, g: 1, b: 1, a: 0}
         key2: {r: 0, g: 0, b: 0, a: 0}
         key3: {r: 0, g: 0, b: 0, a: 0}
         key4: {r: 0, g: 0, b: 0, a: 0}
@@ -1379,7 +1379,7 @@ ParticleSystem:
         ctime6: 0
         ctime7: 0
         atime0: 0
-        atime1: 65535
+        atime1: 58982
         atime2: 0
         atime3: 0
         atime4: 0
@@ -4826,4 +4826,4 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8c72efd9f1978c947a4fe6c239e0d9c9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  time: 5
+  time: 4.5

@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 [RequireComponent(typeof(CharacterMovement))]
@@ -33,7 +34,7 @@ public class Enemy : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (!targetCharacter)
+        if (!targetCharacter || !targetCharacter.GetComponent<Recording>().Alive)
         {
             FindPlayer();
         }
@@ -51,7 +52,7 @@ public class Enemy : MonoBehaviour
 
     private void FindPlayer()
     {
-        GameObject[] targetCharacters = GameObject.FindGameObjectsWithTag("Player");
+        GameObject[] targetCharacters = GameObject.FindGameObjectsWithTag("Player").Where(x => x.GetComponent<Recording>().Alive).ToArray();
         float minDistance = float.MaxValue;
         for (int i = 0; i < targetCharacters.Length; i++)
         {

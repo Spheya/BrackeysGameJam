@@ -1,183 +1,213 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using UnityEditor.PackageManager.UI;
 using UnityEngine;
 
 public class Recording : MonoBehaviour
 {
-    bool recording = true;
+    bool playing = false;
 
     [SerializeField]
     bool destroyOnFinish = true;
+
     [SerializeField]
-    bool canRollbackDeath = false;
+    float precision = 1.0f / 30.0f;
+    public const float maxTime = 10.0f;
+
+    [SerializeField]
     bool alive = true;
-    float deathTimer = 0.0f;
+    public bool Alive { get => alive;
+        set => alive = value; }
 
-    const float maxTime = 10.0f; // seconds between the start and end of the recording
-    const float precision = 1.0f / 30.0f; // time between recorded positions
-    float positionTimer = 0.0f;
-    float totalTimer = 0.0f;
-    Queue<Vector2> recordingPositions = new Queue<Vector2>();
-    Queue<Vector3> recordingGunPositions = new Queue<Vector3>();
-    Queue<Vector3> recordingBullets = new Queue<Vector3>(); // (x, y) for position, I'm using z as time (so I don't need another queue lol)
+    // A simple class to make storing samples easier
+    private class RecordSample
+    {
+        public float Time { get; }
 
-    Vector2 currentPosition;
-    Vector2 nextPosition;
-    Vector3 currentGunPosition;
-    Vector3 nextGunPosition;
+        public Vector2 Position { get; }
+        public Vector2 GunDirection { get; }
+        public bool Shoot { get; }
+
+        public RecordSample(float time, Vector2 position)
+        {
+            Time = time;
+            Position = position;
+            GunDirection = Vector2.right;
+            Shoot = false;
+        }
+
+        public RecordSample(float time, Vector2 position, Vector2 gunDirection, bool shoot)
+        {
+            Time = time;
+            Position = position;
+            GunDirection = gunDirection;
+            Shoot = shoot;
+        }
+
+        public static RecordSample Lerp(RecordSample a, RecordSample b, float mix) => new RecordSample(
+                Mathf.Lerp(a.Time, b.Time, mix),
+                Vector2.Lerp(a.Position, b.Position, mix),
+                Vector2.Lerp(a.GunDirection, b.GunDirection, mix),
+                false
+        );
+    }
+
+    List<RecordSample> samples = new List<RecordSample>();
 
     Gun gun;
 
-    // Start is called before the first frame update
+    float timer;
+    public float Timer => timer;
+
     void Start()
     {
-        recordingPositions.Enqueue(new Vector2(transform.position.x, transform.position.y));
-        gun = transform.GetComponentInChildren<Gun>();
+        timer = 0.0f;
+        samples.Add(new RecordSample(0.0f, transform.position));
 
-        if(gun)
-            recordingGunPositions.Enqueue(new Vector2(gun.transform.position.x, gun.transform.position.y));
+        gun = GetComponentInChildren<Gun>();
     }
 
-    // Update is called once per frame
+    int shotIndex = -1;
+
+    private RecordSample InterpolateSampleAt(float time)
+    {
+        if (time <= samples[0].Time)
+            return null;
+
+        RecordSample previousSample = null;
+        for(int i = 0; i < samples.Count; i++)
+        {
+            var sample = samples[i];
+            if(sample.Time > time)
+            {
+                if(previousSample.Shoot && shotIndex != i-1)
+                {
+                    shotIndex = i-1;
+                    return previousSample;
+                }else
+                {
+                    shotIndex = -1;
+                }
+
+                float mix = (time - previousSample.Time) / (sample.Time - previousSample.Time);
+                return RecordSample.Lerp(previousSample, sample, mix);
+            }
+            previousSample = samples[i];
+        }
+        return null;
+    }
+
+    private void ApplySample(RecordSample sample)
+    {
+        transform.position = sample.Position;
+
+        if (gun)
+        {
+            gun.AimAt(sample.GunDirection);
+
+            if (sample.Shoot)
+                gun.Shoot();
+        }
+    }
+
+    private void RecordNewSample()
+    {
+        if (gun)
+        {
+            samples.Add(new RecordSample(timer, transform.position, gun.transform.position - transform.position, false));
+        }
+        else
+        {
+            samples.Add(new RecordSample(timer, transform.position));
+        }
+    }
+
+    private void CullOldSamples()
+    {
+        while (samples.Count > 0 && samples[0].Time < timer - maxTime)
+            samples.RemoveAt(0);
+    }
+
     void Update()
     {
-        positionTimer += Time.deltaTime;
-        totalTimer += Time.deltaTime;
+        // Keep the timer up to date
+        timer += Time.deltaTime;
 
-        if (recording)
+        // Don't let the list get longer than it needs to be! We don't need to record the entire game, only the last few seconds
+        CullOldSamples();
+
+        // If this object is dead and no samples are stored anymore, there's no use respawning it, as there wont be any data to display
+        if (!Alive && samples.Count == 0)
         {
-            if (alive)
+            Destroy(gameObject);
+            return;
+        }
+
+        if (timer < 0.0f)
+        {
+            // This object was rewinded to a point before its creation
+            Die();
+        }
+        else
+        {
+            var sample = InterpolateSampleAt(timer);
+
+            if(sample == null)
             {
-                if (positionTimer > precision)
+                if (Alive)
                 {
-                    positionTimer -= precision;
-
-                    recordingPositions.Enqueue(new Vector2(transform.position.x, transform.position.y));
-
-                    if (gun)
-                        recordingGunPositions.Enqueue(new Vector2(gun.transform.position.x, gun.transform.position.y));
-
-                    // Don't let the queue get longer than it needs to be! We don't need to record the entire game, only the last few seconds
-                    if ((float)recordingPositions.Count * precision > maxTime)
+                    // No sample found at the current time, so we are recording
+                    var previousSample = samples[samples.Count - 1];
+                    if (timer - previousSample.Time >= precision)
                     {
-                        recordingPositions.Dequeue();
+                        // The duration of a sample has passed since the previous sample, so we need to make a new one
+                        RecordNewSample();
+                    }
 
-                        if (gun)
-                            recordingGunPositions.Dequeue();
+                    if (playing)
+                    {
+                        if (destroyOnFinish)
+                        {
+                            Die();
+                        }
+                        else
+                        {
+                            playing = false;
+
+                            Enemy enemy = GetComponent<Enemy>();
+                            if (enemy != null)
+                            {
+                                enemy.enabled = true;
+                            }
+                        }
                     }
                 }
             }
             else
             {
-                deathTimer += Time.deltaTime;
-                if (deathTimer > 10.0f)
-                {
-                    // Dead, this can't be reversed
-                    Destroy(gameObject);
-                }
-            }
+                // A sample was stored for the current time, so we are playing back
+                if (!Alive)
+                    Resurrect();
 
-            // This is to trim bullets that were fired over 10 seconds ago
-            if (recordingBullets.Count > 0)
-            {
-                if (recordingBullets.Peek().z < totalTimer - maxTime)
-                {
-                    recordingBullets.Dequeue();
-                }
-            }
-        }
-        else
-        {
-            // play the recording
-
-            if (positionTimer > precision)
-            {
-                positionTimer -= precision;
-
-                if (recordingPositions.Count > 0)
-                {
-                    currentPosition = nextPosition;
-                    nextPosition = recordingPositions.Dequeue();
-
-                    if (gun)
-                    {
-                        currentGunPosition = nextGunPosition;
-                        nextGunPosition = recordingGunPositions.Dequeue();
-                    }
-                }
-                else
-                {
-                    if (destroyOnFinish)
-                    {
-                        Destroy(gameObject);
-                    }
-                    else
-                    {
-                        recording = true;
-
-                        Enemy enemy = GetComponent<Enemy>();
-                        if (enemy != null)
-                        {
-                            enemy.enabled = true;
-                        }
-                    }
-                }
-            }
-
-            float time;
-            Vector2 lerpPosition;
-
-            if (gun)
-            {
-                if (recordingBullets.Count > 0)
-                {
-                    Vector3 nextGun = recordingBullets.Peek();
-
-                    if (totalTimer > nextGun.z)
-                    {
-                        Vector3 offset = nextGun;
-                        offset.z = offset.y / 100.0f;
-                        gun.transform.position = gun.Parent.transform.position + offset;
-
-                        // Rotate towards that direction and flip if the gun appears upside down
-                        float rotation = (Mathf.Atan2(offset.y, offset.x) * 180.0f / Mathf.PI + 180.0f) % 360.0f;
-                        gun.transform.eulerAngles = new Vector3(0.0f, 0.0f, rotation);
-                        gun.transform.localScale = new Vector3(1.0f, (rotation < 270.0f && rotation > 90.0f) ? -1.0f : 1.0f, 1.0f);
-                        gun.Shoot();
-
-                        recordingBullets.Dequeue();
-                    }
-                }
-            }
-
-            time = positionTimer / precision; // time normalised between 0 and 1, for interpolation
-            lerpPosition = Vector2.Lerp(currentPosition, nextPosition, time);
-            transform.position = new Vector3(lerpPosition.x, lerpPosition.y, 0.0f);
-
-            if(gun)
-            {
-                var lerpGunPosition = Vector3.Lerp(currentGunPosition, nextGunPosition, time);
-                gun.transform.position = new Vector3(lerpGunPosition.x, lerpGunPosition.y, 0.0f);
-                Vector2 offset = gun.transform.position - transform.position;
-                float rotation = (Mathf.Atan2(offset.y, offset.x) * 180.0f / Mathf.PI + 180.0f) % 360.0f;
-                gun.transform.eulerAngles = new Vector3(0.0f, 0.0f, rotation);
-                gun.transform.localScale = new Vector3(1.0f, (rotation < 270.0f && rotation > 90.0f) ? -1.0f : 1.0f, 1.0f);
+                ApplySample(sample);
             }
         }
     }
 
-    public void Play()
+    public void Play() => Play(timer - maxTime);
+
+    public void Play(float newTime)
     {
-        recordingPositions.Enqueue(new Vector2(transform.position.x, transform.position.y));
+        // Play back
+        if(!playing)
+            RecordNewSample();
+        timer = newTime;
 
-        if(gun)
-            recordingGunPositions.Enqueue(new Vector2(gun.transform.position.x, gun.transform.position.y));
+        playing = true;
 
-        recording = false;
-        positionTimer = 0.0f;
-        totalTimer = Mathf.Max(0.0f, totalTimer - maxTime);
-
+        // Make sure other components dont try to take control
+        // eliminate the middle class
         Player player = GetComponent<Player>();
         if (player != null)
         {
@@ -192,78 +222,48 @@ public class Recording : MonoBehaviour
         {
             gun.DoUpdate = false;
         }
-
-        if (!alive && canRollbackDeath)
-        {
-            alive = true;
-            // Rolling back death
-
-            float sync = deathTimer % precision;
-            positionTimer += sync;
-            totalTimer += sync;
-
-            if (enemy)
-                enemy.health = 100.0f;
-
-            SpriteRenderer renderer = GetComponent<SpriteRenderer>();
-            if (renderer)
-            {
-                renderer.enabled = true;
-            }
-            BoxCollider2D collider = GetComponent<BoxCollider2D>();
-            if (collider)
-            {
-                collider.enabled = true;
-            }
-        }
-
-        currentPosition = recordingPositions.Dequeue();
-        nextPosition = recordingPositions.Dequeue();
-
-        if (gun)
-        {
-            currentGunPosition = recordingGunPositions.Dequeue();
-            nextGunPosition = recordingGunPositions.Dequeue();
-        }
     }
 
     public Vector2 GetStartPosition()
     {
-        if (recordingPositions.Count > 0)
-        {
-            return recordingPositions.Peek();
-        }
-        else
-        {
-            return Vector2.zero;
-        }
+        return samples[0].Position;
     }
 
     public void RecordBullet(Vector2 direction)
     {
-        recordingBullets.Enqueue(new Vector3(direction.x, direction.y, totalTimer));
+        samples.Add(new RecordSample(timer, transform.position, direction, true));
     }
 
     public void Die()
     {
-        alive = false;
-        if (canRollbackDeath)
+        Alive = false;
+        // Dying, but this may get rolled back
+        SpriteRenderer[] renderers = GetComponentsInChildren<SpriteRenderer>();
+        foreach (var renderer in renderers)
         {
-            // Dying, but this may get rolled back
-            SpriteRenderer renderer = GetComponent<SpriteRenderer>();
-            if (renderer)
-            {
-                renderer.enabled = false;
-            }
-            BoxCollider2D collider = GetComponent<BoxCollider2D>();
-            if (collider)
-            {
-                collider.enabled = false;
-            }
+            renderer.enabled = false;
         }
-        else
+        BoxCollider2D collider = GetComponent<BoxCollider2D>();
+        if (collider)
         {
-            Destroy(gameObject);
+            collider.enabled = false;
+        }
+    }
+
+    private void Resurrect()
+    {
+        Alive = true;
+
+        // Dying, but in reverse
+        SpriteRenderer[] renderers = GetComponentsInChildren<SpriteRenderer>();
+        foreach (var renderer in renderers)
+        {
+            renderer.enabled = true;
+        }
+        BoxCollider2D collider = GetComponent<BoxCollider2D>();
+        if (collider)
+        {
+            collider.enabled = true;
         }
     }
 }

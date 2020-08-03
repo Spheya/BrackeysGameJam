@@ -43,8 +43,12 @@ public class Gun : MonoBehaviour
         // Get the direction the player is aiming in
         Vector3 aimPos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
         Vector3 aimDir = aimPos - Parent.transform.position;
-        aimDir.z = 0.0f;
 
+        AimAt(aimDir);
+    }
+
+    public void AimAt(Vector2 aimDir)
+    {
         // Set the length of that direction to the distance
         Vector3 offset = aimDir.normalized * Distance;
         offset.z = offset.y / 100.0f;
@@ -58,7 +62,7 @@ public class Gun : MonoBehaviour
 
     private void UpdateShooting()
     {
-        if (Input.GetMouseButton(0))
+        if (DoUpdate && Input.GetMouseButton(0))
             TryShoot();
     }
 
