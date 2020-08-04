@@ -2987,5 +2987,15 @@ PrefabInstance:
       propertyPath: m_Icon
       value: 
       objectReference: {fileID: 0}
+    - target: {fileID: 7696876362471746992, guid: d5ec917fab205ae4a8c94274453c15f6,
+        type: 3}
+      propertyPath: maxSpeed
+      value: 5
+      objectReference: {fileID: 0}
+    - target: {fileID: 7696876362471746992, guid: d5ec917fab205ae4a8c94274453c15f6,
+        type: 3}
+      propertyPath: acceleration
+      value: 10
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: d5ec917fab205ae4a8c94274453c15f6, type: 3}

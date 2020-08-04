@@ -11,12 +11,18 @@ public class Enemy : MonoBehaviour
 
     CharacterMovement character;
 
+    Vector2 velocity = Vector2.zero;
+    const float maxTurnVelocity = 0.2f;
+    float turnCooldownTimer = 0.0f;
+    const float turnCooldown = 0.8f;
 
     [Range(0.0f, 100.0f)]
     public float health = 100.0f;
-    private float speed = 1.0f;
+    private float speed = 0.0f;
     [Range(0.0f, 10.0f)]
     public float maxSpeed = 5.0f;
+    [Range(0.0f, 20.0f)]
+    public float acceleration = 10.0f;
 
     public GameObject explosion;
 
@@ -45,9 +51,63 @@ public class Enemy : MonoBehaviour
 
             if (targetCharacter)
             {
-                Vector2 inputVector = (targetCharacter.transform.position - transform.position).normalized * speed;
+                Vector2 inputVector = (targetCharacter.transform.position - transform.position).normalized;
 
-                character.Move(inputVector);
+                // true if enemy wants to go up/down more than left/right
+                bool hInputAxis = Mathf.Abs(inputVector.x) > Mathf.Abs(inputVector.y);
+                 // true if enemy is currently going up/down more than left/right
+                bool hVelocityAxis = Mathf.Abs(velocity.x) > Mathf.Abs(velocity.y);
+
+                if (turnCooldownTimer < turnCooldown)
+                {
+                    turnCooldownTimer += Time.deltaTime;
+                }
+
+                if ((hInputAxis == hVelocityAxis) || (turnCooldownTimer < turnCooldown))
+                {
+                    // Enemy wants to travel along the same axis it's already on
+                    if (hVelocityAxis)
+                    {
+                        // moving horizontally
+                        velocity.x += acceleration * Mathf.Sign(inputVector.x) * Time.deltaTime;
+                    }
+                    else
+                    {
+                        // moving vertically
+                        velocity.y += acceleration * Mathf.Sign(inputVector.y) * Time.deltaTime;
+                    }
+                }
+                else
+                {
+                    // Enemy wants to change axis (decelerate current axis)
+                    if (hVelocityAxis)
+                    {
+                        // moving horizontally
+                        velocity.x -= acceleration * Mathf.Sign(velocity.x) * Time.deltaTime;
+                        if (Mathf.Abs(velocity.x) < maxTurnVelocity)
+                        {
+                            velocity.y += acceleration * Mathf.Sign(inputVector.y) * Time.deltaTime;
+                            velocity.x = 0;
+                        }
+                    }
+                    else
+                    {
+                        // moving vertically
+                        velocity.y -= acceleration * Mathf.Sign(velocity.y) * Time.deltaTime;
+                        if (Mathf.Abs(velocity.y) < maxTurnVelocity)
+                        {
+                            velocity.x += acceleration * Mathf.Sign(inputVector.x) * Time.deltaTime;
+                            velocity.y = 0;
+                        }
+                    }
+                }
+
+                if (velocity.magnitude > maxSpeed)
+                {
+                    velocity.Normalize();
+                    velocity *= maxSpeed;
+                }
+                character.Move(velocity);
             }
         }
     }
