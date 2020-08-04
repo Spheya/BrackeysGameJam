@@ -30,28 +30,32 @@ public class Recording : MonoBehaviour
         public Vector2 Position { get; }
         public Vector2 GunDirection { get; }
         public bool Shoot { get; }
+        public float Health { get; }
 
-        public RecordSample(float time, Vector2 position)
+        public RecordSample(float time, Vector2 position, float health)
         {
             Time = time;
             Position = position;
             GunDirection = Vector2.right;
             Shoot = false;
+            Health = health;
         }
 
-        public RecordSample(float time, Vector2 position, Vector2 gunDirection, bool shoot)
+        public RecordSample(float time, Vector2 position, Vector2 gunDirection, bool shoot, float health)
         {
             Time = time;
             Position = position;
             GunDirection = gunDirection;
             Shoot = shoot;
+            Health = health;
         }
 
         public static RecordSample Lerp(RecordSample a, RecordSample b, float mix) => new RecordSample(
                 Mathf.Lerp(a.Time, b.Time, mix),
                 Vector2.Lerp(a.Position, b.Position, mix),
                 Vector2.Lerp(a.GunDirection, b.GunDirection, mix),
-                false
+                false,
+                Mathf.Lerp(a.Health, b.Health, mix)
         );
     }
 
@@ -65,7 +69,7 @@ public class Recording : MonoBehaviour
     void Start()
     {
         timer = 0.0f;
-        samples.Add(new RecordSample(0.0f, transform.position));
+        RecordNewSample();
 
         gun = GetComponentInChildren<Gun>();
     }
@@ -118,13 +122,18 @@ public class Recording : MonoBehaviour
 
     private void RecordNewSample()
     {
+        float health = 100;
+        var enemy = GetComponent<Enemy>();
+        if (enemy)
+            health = enemy.health;
+
         if (gun)
         {
-            samples.Add(new RecordSample(timer, transform.position, gun.transform.position - transform.position, false));
+            samples.Add(new RecordSample(timer, transform.position, gun.transform.position - transform.position, false, health));
         }
         else
         {
-            samples.Add(new RecordSample(timer, transform.position));
+            samples.Add(new RecordSample(timer, transform.position, health));
         }
     }
 
@@ -222,6 +231,8 @@ public class Recording : MonoBehaviour
         if (enemy != null)
         {
             enemy.doUpdate = false;
+            if(samples.Count > 0)
+                enemy.health = samples[0].Health;
         }
         if (gun != null)
         {
@@ -239,7 +250,7 @@ public class Recording : MonoBehaviour
 
     public void RecordBullet(Vector2 direction)
     {
-        samples.Add(new RecordSample(timer, transform.position, direction, true));
+        samples.Add(new RecordSample(timer, transform.position, direction, true, 100.0f));
     }
 
     public void Die()
