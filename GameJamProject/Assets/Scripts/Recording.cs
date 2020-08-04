@@ -214,8 +214,6 @@ public class Recording : MonoBehaviour
     public void Play(float newTime)
     {
         // Play back
-        if (!playing)
-            RecordNewSample();
         timer = newTime;
 
         playing = true;

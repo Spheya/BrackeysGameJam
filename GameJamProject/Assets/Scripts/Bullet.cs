@@ -27,7 +27,7 @@ public class Bullet : MonoBehaviour
                 {
                     var splash = Instantiate(Splash);
                     splash.transform.position = new Vector3(hit.point.x, hit.point.y, splash.transform.position.z);
-                    enemy.TakeDamage(34.0f);
+                    enemy.TakeDamage(55.0f);
                     Destroy(gameObject);
                 }
             }

@@ -50,6 +50,10 @@ public class Enemy : MonoBehaviour
                 character.Move(inputVector);
             }
         }
+        else
+        {
+            character.Move(new Vector2(0.0f, 0.0f));
+        }
     }
 
     private void FindPlayer()
@@ -69,7 +73,6 @@ public class Enemy : MonoBehaviour
 
     public void Die()
     {
-        Debug.Log(name + " dying (Enemy)");
         var effect = Instantiate(explosion);
         effect.transform.position = new Vector3(transform.position.x, transform.position.y, 5.0f);
         GetComponent<Recording>().Die();
@@ -79,7 +82,6 @@ public class Enemy : MonoBehaviour
     public void TakeDamage(float damage)
     {
         health -= damage;
-        Debug.Log(health);
         if (health <= 0.0f)
             Die();
     }
