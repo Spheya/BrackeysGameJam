@@ -101,7 +101,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   health: 100
-  maxSpeed: 5
+  maxSpeed: 3
+  acceleration: 6
   explosion: {fileID: 2412667155387055088, guid: a3430495809d55d41b4e8ea94b0c477c,
     type: 3}
   doUpdate: 1
