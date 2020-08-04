@@ -20,6 +20,8 @@ public class Enemy : MonoBehaviour
 
     public GameObject explosion;
 
+    public bool doUpdate = true;
+
     // Start is called before the first frame update
     void Start()
     {
@@ -34,20 +36,20 @@ public class Enemy : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (!targetCharacter || !targetCharacter.GetComponent<Recording>().Alive)
+        if (doUpdate)
         {
-            FindPlayer();
+            if (!targetCharacter || !targetCharacter.GetComponent<Recording>().Alive)
+            {
+                FindPlayer();
+            }
+
+            if (targetCharacter)
+            {
+                Vector2 inputVector = (targetCharacter.transform.position - transform.position).normalized * speed;
+
+                character.Move(inputVector);
+            }
         }
-
-        if (targetCharacter)
-        {
-            Vector2 inputVector = (targetCharacter.transform.position - transform.position).normalized * speed;
-
-            character.Move(inputVector);
-        }
-
-        if (health <= 0.0f)
-            Die();
     }
 
     private void FindPlayer()
@@ -67,9 +69,18 @@ public class Enemy : MonoBehaviour
 
     public void Die()
     {
+        Debug.Log(name + " dying (Enemy)");
         var effect = Instantiate(explosion);
         effect.transform.position = new Vector3(transform.position.x, transform.position.y, 5.0f);
         GetComponent<Recording>().Die();
-        enabled = false;
+        doUpdate = false;
+    }
+
+    public void TakeDamage(float damage)
+    {
+        health -= damage;
+        Debug.Log(health);
+        if (health <= 0.0f)
+            Die();
     }
 }

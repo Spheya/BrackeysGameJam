@@ -20,6 +20,8 @@ public class Recording : MonoBehaviour
     public bool Alive { get => alive;
         set => alive = value; }
 
+    RecordSample shotThisSample = null;
+
     // A simple class to make storing samples easier
     private class RecordSample
     {
@@ -106,8 +108,11 @@ public class Recording : MonoBehaviour
         {
             gun.AimAt(sample.GunDirection);
 
-            if (sample.Shoot)
+            if (sample.Shoot && sample != shotThisSample)
+            {
                 gun.Shoot();
+                shotThisSample = sample;
+            }
         }
     }
 
@@ -178,7 +183,7 @@ public class Recording : MonoBehaviour
                             Enemy enemy = GetComponent<Enemy>();
                             if (enemy != null)
                             {
-                                enemy.enabled = true;
+                                enemy.doUpdate = true;
                             }
                         }
                     }
@@ -187,7 +192,7 @@ public class Recording : MonoBehaviour
             else
             {
                 // A sample was stored for the current time, so we are playing back
-                if (!Alive)
+                if (!Alive && destroyOnFinish)
                     Resurrect();
 
                 ApplySample(sample);
@@ -200,7 +205,7 @@ public class Recording : MonoBehaviour
     public void Play(float newTime)
     {
         // Play back
-        if(!playing)
+        if (!playing)
             RecordNewSample();
         timer = newTime;
 
@@ -216,12 +221,15 @@ public class Recording : MonoBehaviour
         Enemy enemy = GetComponent<Enemy>();
         if (enemy != null)
         {
-            enemy.enabled = false;
+            enemy.doUpdate = false;
         }
         if (gun != null)
         {
             gun.DoUpdate = false;
         }
+
+        if (!Alive)
+          Resurrect();
     }
 
     public Vector2 GetStartPosition()
@@ -253,6 +261,14 @@ public class Recording : MonoBehaviour
     private void Resurrect()
     {
         Alive = true;
+
+        Enemy enemy = GetComponent<Enemy>();
+        if (enemy != null)
+        {
+            enemy.enabled = true;
+            enemy.doUpdate = false;
+            enemy.health = 100.0f;
+        }
 
         // Dying, but in reverse
         SpriteRenderer[] renderers = GetComponentsInChildren<SpriteRenderer>();
