@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using UnityEngine.UIElements;
 
 [RequireComponent(typeof(CharacterMovement))]
 [RequireComponent(typeof(Recording))]
@@ -114,6 +115,17 @@ public class Enemy : MonoBehaviour
         {
             character.Move(new Vector2(0.0f, 0.0f));
         }
+    }
+
+    private void LateUpdate()
+    {
+        // I should get the enemy to collide with two specific colliders, but idk how to do that tbh. so this code came to be
+
+        if (transform.position.y > 4.0f)
+            transform.position = new Vector3(transform.position.x, 4.0f, transform.position.y);
+
+        if (transform.position.y < -3.55f)
+            transform.position = new Vector3(transform.position.x, -3.55f, transform.position.y);
     }
 
     private void FindPlayer()
