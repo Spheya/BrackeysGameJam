@@ -79,8 +79,8 @@ public class Player : MonoBehaviour
 
         activeRecording = true;
 
-        GetComponent<SpriteRenderer>().color = new Color(1.0f, 1.0f, 1.0f, 0.25f);
-        GetComponentsInChildren<SpriteRenderer>()[1].color = new Color(1.0f, 1.0f, 1.0f, 0.25f);
+        GetComponent<SpriteRenderer>().color = new Color(1.0f, 1.0f, 1.0f, 0.45f);
+        GetComponentsInChildren<SpriteRenderer>()[1].color = new Color(1.0f, 1.0f, 1.0f, 0.45f);
 
         Destroy(FindObjectOfType<RewindTimer>()?.gameObject);
 

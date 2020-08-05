@@ -203,7 +203,7 @@ public class Recording : MonoBehaviour
             else
             {
                 // A sample was stored for the current time, so we are playing back
-                if (!Alive && destroyOnFinish)
+                if (!Alive)
                     Resurrect();
 
                 ApplySample(sample);
@@ -257,8 +257,18 @@ public class Recording : MonoBehaviour
 
     public void Die()
     {
-        Alive = false;
         // Dying, but this may get rolled back
+
+        // Get rid of all the samples that exist after the point of dying
+        for (int i = 0; i < samples.Count; i++)
+            if (samples[i].Time >= timer)
+                samples.RemoveAt(i);
+
+        // Record a sample at the moment this object dies for that frame perfect consistency
+        RecordNewSample();
+
+        Alive = false;
+
         SpriteRenderer[] renderers = GetComponentsInChildren<SpriteRenderer>();
         foreach (var renderer in renderers)
         {
