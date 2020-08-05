@@ -29,6 +29,10 @@ public class Gun : MonoBehaviour
 
     private bool _canShoot = true;
 
+    private Vector3 aimPosLast = Vector3.zero;
+    private Vector3 aimDirLast = Vector3.right;
+    private bool usingMouse = true; // false when using controller
+
     private void Update()
     {
         if (_doUpdate)
@@ -42,9 +46,24 @@ public class Gun : MonoBehaviour
     {
         // Get the direction the player is aiming in
         Vector3 aimPos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
-        Vector3 aimDir = aimPos - Parent.transform.position;
+        if (aimPos != aimPosLast)
+        {
+            usingMouse = true;
+            aimPosLast = aimPos;
+        }
+        Vector3 aimDir = new Vector3(Input.GetAxisRaw("Right Joystick X"), Input.GetAxisRaw("Right Joystick Y"), 0.0f);
+        if (aimDir.magnitude > 0.1)
+        {
+            usingMouse = false;
+            aimDirLast = aimDir;
+        }
 
-        AimAt(aimDir);
+        if (usingMouse)
+        {
+            aimDirLast = aimPosLast - Parent.transform.position;
+        }
+
+        AimAt(aimDirLast);
     }
 
     public void AimAt(Vector2 aimDir)
@@ -62,8 +81,21 @@ public class Gun : MonoBehaviour
 
     private void UpdateShooting()
     {
-        if (DoUpdate && Input.GetMouseButton(0))
-            TryShoot();
+        if (DoUpdate)
+        {
+            if (Input.GetMouseButton(0))
+            {
+                usingMouse = true;
+                UpdatePosition();
+                TryShoot();
+            }
+            else if (Input.GetKey(KeyCode.Joystick1Button4) || Input.GetKey(KeyCode.Joystick1Button5))
+            {
+                usingMouse = false;
+                UpdatePosition();
+                TryShoot();
+            }
+        }
     }
 
     public bool TryShoot()
