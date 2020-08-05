@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 [RequireComponent(typeof(CharacterMovement))]
@@ -42,7 +43,7 @@ public class Player : MonoBehaviour
     {
         if (!rewinding)
         {
-            if (true)
+            if (FindObjectsOfType<Player>().Where(x => x.GetComponent<Recording>().Alive).Count() < 2)
             {
                 rewinding = true;
                 FindObjectOfType<RewindPostProcessing>().Play();

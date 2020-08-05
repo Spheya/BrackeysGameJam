@@ -171,14 +171,6 @@ public class Recording : MonoBehaviour
             {
                 if (Alive)
                 {
-                    // No sample found at the current time, so we are recording
-                    var previousSample = samples[samples.Count - 1];
-                    if (timer - previousSample.Time >= precision)
-                    {
-                        // The duration of a sample has passed since the previous sample, so we need to make a new one
-                        RecordNewSample();
-                    }
-
                     if (playing)
                     {
                         if (destroyOnFinish)
@@ -194,6 +186,16 @@ public class Recording : MonoBehaviour
                             {
                                 enemy.doUpdate = true;
                             }
+                        }
+                    }
+                    else
+                    {
+                        // No sample found at the current time, so we are recording
+                        var previousSample = samples[samples.Count - 1];
+                        if (timer - previousSample.Time >= precision)
+                        {
+                            // The duration of a sample has passed since the previous sample, so we need to make a new one
+                            RecordNewSample();
                         }
                     }
                 }
@@ -214,6 +216,8 @@ public class Recording : MonoBehaviour
     public void Play(float newTime)
     {
         // Play back
+        //if (!playing)
+        //    RecordNewSample();
         timer = newTime;
 
         playing = true;
