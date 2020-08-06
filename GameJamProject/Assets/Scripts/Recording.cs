@@ -6,6 +6,7 @@ using UnityEngine;
 
 public class Recording : MonoBehaviour
 {
+    [SerializeField]
     bool playing = false;
 
     [SerializeField]
@@ -18,7 +19,7 @@ public class Recording : MonoBehaviour
     [SerializeField]
     bool alive = true;
     public bool Alive { get => alive;
-        set => alive = value; }
+        private set => alive = value; }
 
     RecordSample shotThisSample = null;
 
@@ -161,7 +162,7 @@ public class Recording : MonoBehaviour
         if (timer < 0.0f)
         {
             // This object was rewinded to a point before its creation
-            Die();
+            Die(true);
         }
         else
         {
@@ -171,7 +172,7 @@ public class Recording : MonoBehaviour
             {
                 if (Alive)
                 {
-                    if (playing)
+                    if (playing && timer >= samples[samples.Count - 1].Time)
                     {
                         if (destroyOnFinish)
                         {
@@ -255,17 +256,20 @@ public class Recording : MonoBehaviour
         samples.Add(new RecordSample(timer, transform.position, direction, true, 100.0f));
     }
 
-    public void Die()
+    public void Die(bool preBirth = false)
     {
         // Dying, but this may get rolled back
 
         // Get rid of all the samples that exist after the point of dying
-        for (int i = 0; i < samples.Count; i++)
+        if (!preBirth)
         {
-            if (samples[i].Time >= timer)
+            for (int i = 0; i < samples.Count; i++)
             {
-                samples.RemoveAt(i);
-                --i;
+                if (samples[i].Time >= timer)
+                {
+                    samples.RemoveAt(i);
+                    --i;
+                }
             }
         }
 

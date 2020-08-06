@@ -72,9 +72,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _prototype: {fileID: 7696876362471746992, guid: d5ec917fab205ae4a8c94274453c15f6,
     type: 3}
-  _initialCooldown: 5
-  _bonusCooldown: 1
-  _randomBonusCooldown: 1
-  _cooldownGrowthFactor: 0.8
-  _maxSpawns: 6
-  _minSpawns: 2
+  _initialCooldown: 9
+  _bonusCooldown: 0
+  _randomBonusCooldown: 0.15
+  _cooldownGrowthFactor: 0.995
+  _maxSpawns: 2
+  _minSpawns: 1
+  _maxEnemies: 75

@@ -130,7 +130,7 @@ public class Enemy : MonoBehaviour
 
     private void FindPlayer()
     {
-        GameObject[] targetCharacters = GameObject.FindGameObjectsWithTag("Player").Where(x => x.GetComponent<Recording>().Alive).ToArray();
+        GameObject[] targetCharacters = GameObject.FindGameObjectsWithTag("Player").Where(x => x.GetComponent<Player>().isActiveAndEnabled).ToArray();
         float minDistance = float.MaxValue;
         for (int i = 0; i < targetCharacters.Length; i++)
         {
