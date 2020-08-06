@@ -261,8 +261,13 @@ public class Recording : MonoBehaviour
 
         // Get rid of all the samples that exist after the point of dying
         for (int i = 0; i < samples.Count; i++)
+        {
             if (samples[i].Time >= timer)
+            {
                 samples.RemoveAt(i);
+                --i;
+            }
+        }
 
         // Record a sample at the moment this object dies for that frame perfect consistency
         RecordNewSample();
