@@ -78,7 +78,10 @@ public class Player : MonoBehaviour
 
         Recording recording = GetComponent<Recording>();
         Vector2 origin = recording.GetStartPosition();
-        health = recording.GetStartHealth();
+        //health = recording.GetStartHealth();
+
+        if (health <= 0)
+            health = 100;
 
         spriteRenderer.enabled = true;
 
@@ -89,6 +92,7 @@ public class Player : MonoBehaviour
 
         var obj = Instantiate(gameObject, new Vector3(origin.x, origin.y, 0.0f), Quaternion.identity);
         obj.name = "Player";
+        obj.GetComponent<Player>().invincibleTimer = 0.0f;
         name = "Player(Clone)";
         for (int i = 0; i < recordings.Length; i++)
         {
@@ -116,7 +120,7 @@ public class Player : MonoBehaviour
     {
         if (invincibleTimer > invincibilityTime)
         {
-            if (other.gameObject.tag == "Enemy")
+            if (other.gameObject.tag == "Enemy" && other.GetComponent<SpriteRenderer>().enabled)
             {
                 TakeDamage(17.0f);
             }
