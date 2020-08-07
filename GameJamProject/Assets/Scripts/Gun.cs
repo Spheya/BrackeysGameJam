@@ -115,9 +115,6 @@ public class Gun : MonoBehaviour
             _canShoot = false;
             StartCoroutine(CanShootCoroutine());
 
-            audioSource.clip = _shootClips[Random.Range(0, 9)];
-            audioSource.Play();
-
             return true;
         }
         return false;
@@ -135,6 +132,9 @@ public class Gun : MonoBehaviour
         bullet.transform.position = transform.position + Vector3.forward * (_distance + 0.1f);
         bullet.transform.rotation = transform.rotation;
         bullet.transform.localScale = transform.localScale;
+
+        audioSource.clip = _shootClips[Random.Range(0, 9)];
+        audioSource.Play();
 
         if (_recording && _doUpdate)
         {

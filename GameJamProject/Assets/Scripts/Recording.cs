@@ -243,6 +243,11 @@ public class Recording : MonoBehaviour
         if (gun != null)
         {
             gun.DoUpdate = false;
+            AudioSource gunAudioSource = gun.GetComponent<AudioSource>();
+            if (gunAudioSource)
+            {
+                gunAudioSource.volume = 0.45f;
+            }
         }
 
         if (!Alive)
