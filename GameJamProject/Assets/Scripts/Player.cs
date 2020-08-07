@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 [RequireComponent(typeof(CharacterMovement))]
 [RequireComponent(typeof(Recording))]
@@ -67,6 +68,7 @@ public class Player : MonoBehaviour
             else
             {
                 Destroy(gameObject);
+                SceneManager.LoadScene("Menu");
             }
         }
     }
