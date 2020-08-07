@@ -24,6 +24,10 @@ public class Gun : MonoBehaviour
     public float ShootCooldown { get => _shootCooldown; set => _shootCooldown = value; }
 
     [SerializeField]
+    private AudioClip[] _shootClips;
+    private AudioSource audioSource;
+
+    [SerializeField]
     private bool _doUpdate = true;
     public bool DoUpdate { get => _doUpdate; set => _doUpdate = value; }
 
@@ -32,6 +36,11 @@ public class Gun : MonoBehaviour
     private Vector3 aimPosLast = Vector3.zero;
     private Vector3 aimDirLast = Vector3.right;
     private bool usingMouse = true; // false when using controller
+
+    private void Start()
+    {
+        audioSource = GetComponent<AudioSource>();
+    }
 
     private void Update()
     {
@@ -105,6 +114,9 @@ public class Gun : MonoBehaviour
             Shoot();
             _canShoot = false;
             StartCoroutine(CanShootCoroutine());
+
+            audioSource.clip = _shootClips[Random.Range(0, 9)];
+            audioSource.Play();
 
             return true;
         }
