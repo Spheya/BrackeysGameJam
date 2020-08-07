@@ -7,16 +7,24 @@ using UnityEngine;
 [RequireComponent(typeof(Recording))]
 public class Player : MonoBehaviour
 {
+    SpriteRenderer spriteRenderer;
     CharacterMovement character;
     static bool activeRecording = false;
 
     [Range(0.0f, 100.0f)]
     public float health = 100.0f;
+    [Range(0.0f, 4.0f)]
+    public float invincibilityTime = 1.5f;
+    private float invincibleTimer = float.MaxValue;
+
+    HealthBarMask healthBar;
 
     // Start is called before the first frame update
     void Start()
     {
         character = GetComponent<CharacterMovement>();
+        spriteRenderer = GetComponent<SpriteRenderer>();
+        healthBar = FindObjectOfType<HealthBarMask>();
     }
 
     // Update is called once per frame
@@ -32,10 +40,17 @@ public class Player : MonoBehaviour
             inputVector.Normalize();
         }
         character.Move(inputVector);
-
-        if (Input.GetKeyDown(KeyCode.Space))
+        
+        if (invincibleTimer < invincibilityTime)
         {
-            Die();
+            invincibleTimer += Time.deltaTime;
+
+            spriteRenderer.enabled = ((int)(invincibleTimer * 8)) % 2 > 0;
+
+            if (invincibleTimer >= invincibilityTime)
+            {
+                spriteRenderer.enabled = true;
+            }
         }
     }
 
@@ -63,6 +78,9 @@ public class Player : MonoBehaviour
 
         Recording recording = GetComponent<Recording>();
         Vector2 origin = recording.GetStartPosition();
+        health = recording.GetStartHealth();
+
+        spriteRenderer.enabled = true;
 
         float newTime = Mathf.Max(recording.Timer - Recording.maxTime, 0.0f);
         float rewindAmount = recording.Timer - newTime;
@@ -77,9 +95,11 @@ public class Player : MonoBehaviour
             recordings[i].Play(recordings[i].Timer - rewindAmount);
         }
 
+        healthBar.Player = obj.GetComponent<Player>();
+
         activeRecording = true;
 
-        GetComponent<SpriteRenderer>().color = new Color(1.0f, 1.0f, 1.0f, 0.45f);
+        spriteRenderer.color = new Color(1.0f, 1.0f, 1.0f, 0.45f);
         GetComponentsInChildren<SpriteRenderer>()[1].color = new Color(1.0f, 1.0f, 1.0f, 0.45f);
 
         Destroy(FindObjectOfType<RewindTimer>()?.gameObject);
@@ -90,5 +110,27 @@ public class Player : MonoBehaviour
     private void OnDestroy()
     {
         activeRecording = false;
+    }
+
+    private void OnTriggerEnter2D(Collider2D other)
+    {
+        if (invincibleTimer > invincibilityTime)
+        {
+            if (other.gameObject.tag == "Enemy")
+            {
+                TakeDamage(17.0f);
+            }
+        }
+    }
+
+    private void TakeDamage(float damage)
+    {
+        health -= damage;
+        Debug.Log("Took damage - Health : " + health);
+        if (health < 0)
+        {
+            Die();
+        }
+        invincibleTimer = 0;
     }
 }

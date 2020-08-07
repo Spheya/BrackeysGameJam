@@ -127,6 +127,9 @@ public class Recording : MonoBehaviour
         var enemy = GetComponent<Enemy>();
         if (enemy)
             health = enemy.health;
+        var player = GetComponent<Player>();
+        if (player)
+            health = player.health;
 
         if (gun)
         {
@@ -249,6 +252,11 @@ public class Recording : MonoBehaviour
     public Vector2 GetStartPosition()
     {
         return samples[0].Position;
+    }
+
+    public float GetStartHealth()
+    {
+        return samples[0].Health;
     }
 
     public void RecordBullet(Vector2 direction)
